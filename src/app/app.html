@@ -1,0 +1,145 @@
+<main class="page-shell">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="RAG, inicio">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none">
+          <path d="M8 6.5h10l6 6v13H8v-19Z" />
+          <path d="M18 6.5v6h6M12 17h8M12 21h8" />
+        </svg>
+      </span>
+      <span>RAG <span class="brand-divider">/</span> DOCS</span>
+    </a>
+    <span class="local-badge"><span></span> Procesamiento local</span>
+  </header>
+
+  <section class="intro" aria-labelledby="page-title">
+    <p class="eyebrow"><span class="eyebrow-line"></span> TU DOCUMENTO, TUS RESPUESTAS</p>
+    <h1 id="page-title">Pregunta a tus <span>documentos.</span></h1>
+    <p class="intro-copy">
+      Sube un archivo de texto y encuentra respuestas basadas en su contenido, sin salir de tu
+      entorno.
+    </p>
+  </section>
+
+  <section class="workspace" aria-label="Consulta de documentos">
+    <div class="section-heading">
+      <div class="step-number">01</div>
+      <div>
+        <h2>Prepara tu consulta</h2>
+        <p>Primero añade el texto que quieres consultar.</p>
+      </div>
+    </div>
+
+    <div class="upload-area">
+      <label class="field-label" for="document">Documento de texto</label>
+      <div class="file-picker" [class.has-file]="selectedFile()">
+        <input
+          id="document"
+          class="file-input"
+          type="file"
+          accept=".txt,text/plain"
+          [disabled]="uploadPending()"
+          aria-describedby="file-hint"
+          (change)="onFileSelected($event)"
+        />
+        <span class="file-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M7 3.75h7l4.25 4.5v12H7a2 2 0 0 1-2-2v-12a2.5 2.5 0 0 1 2-2.5Z" />
+            <path d="M14 4v5h4M8.5 13h7M8.5 16.5h7" />
+          </svg>
+        </span>
+        <span class="file-copy">
+          <strong>{{ selectedFile()?.name || 'Elige un archivo .txt' }}</strong>
+          <span id="file-hint">Un solo archivo · Máximo 5 MB</span>
+        </span>
+        <span class="choose-button">Seleccionar</span>
+      </div>
+
+      @if (uploadPending()) {
+        <p class="document-status" role="status">
+          <span class="spinner" aria-hidden="true"></span>
+          Procesando documento…
+        </p>
+      } @else if (uploadedDocument(); as document) {
+        <p class="document-status success" role="status">
+          <span class="status-dot" aria-hidden="true"></span>
+          Documento listo · {{ document.chunks }} fragmentos analizados
+        </p>
+      }
+    </div>
+
+    <div class="divider"></div>
+
+    <form (submit)="submitQuestion($event)">
+      <label class="field-label" for="question">¿Qué quieres saber?</label>
+      <div class="question-row">
+        <input
+          id="question"
+          type="text"
+          autocomplete="off"
+          maxlength="1000"
+          placeholder="Escribe una pregunta sobre el documento…"
+          [value]="question"
+          (input)="onQuestionInput($event)"
+        />
+        <button
+          class="submit-button"
+          type="submit"
+          [disabled]="!uploadedDocument() || uploadPending() || questionPending()"
+        >
+          @if (questionPending()) {
+            <span class="spinner button-spinner" aria-hidden="true"></span>
+            Pensando…
+          } @else {
+            Preguntar
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M4 10h12M10 4l6 6-6 6" />
+            </svg>
+          }
+        </button>
+      </div>
+      <p class="privacy-note">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M4 7V5a4 4 0 0 1 8 0v2m-9 0h10v7H3V7Z" />
+        </svg>
+        Las respuestas se generan a partir del contenido de tu documento.
+      </p>
+    </form>
+
+    @if (errorMessage()) {
+      <div class="error-message" role="alert">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <circle cx="10" cy="10" r="7.5" />
+          <path d="M10 6v4.5m0 3h.01" />
+        </svg>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <div class="answer-section">
+      <div class="answer-heading">
+        <label class="field-label" for="answer">Respuesta</label>
+        @if (answer()) {
+          <span class="answer-ready"><span></span> Generada</span>
+        }
+      </div>
+      <textarea
+        id="answer"
+        rows="6"
+        readonly
+        [value]="answer()"
+        [placeholder]="
+          questionPending()
+            ? 'Buscando en el documento y preparando una respuesta…'
+            : 'Tu respuesta aparecerá aquí…'
+        "
+        aria-live="polite"
+      ></textarea>
+    </div>
+  </section>
+
+  <footer class="page-footer">
+    <span>RAG DOCS</span>
+    <span>Recuperación inteligente de información</span>
+  </footer>
+</main>
